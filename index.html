@@ -3184,7 +3184,7 @@ function updatePlayer(dt, inp) {
     if (H(player.x, player.z) < WATER_Y - 1.1 && !inPier(player.x, player.z)) { player.x -= player.vx * dt; player.z -= player.vz * dt; }
     const o = staticPush(player.x, player.z, 0.4, player.y - H(player.x, player.z)); player.x = o.x; player.z = o.z;
     // people are solid: the player slides around them instead of walking through
-    for (const q of peds) { if (q.state === 'down') continue; let dx = player.x - q.x, dz = player.z - q.z; const dd = dx * dx + dz * dz; if (dd > 0.49 || Math.abs(q.y - player.y) > 1.2) continue; const d = Math.sqrt(dd) || 0.01; dx /= d; dz /= d; player.x = q.x + dx * 0.7; player.z = q.z + dz * 0.7; }
+    for (const q of peds) { if (q.state === 'down' || !isFinite(q.x + q.z)) continue; let dx = player.x - q.x, dz = player.z - q.z; const dd = dx * dx + dz * dz; if (dd > 0.49 || Math.abs(q.y - player.y) > 1.2) continue; const d = Math.sqrt(dd) || 0.01; dx /= d; dz /= d; player.x = q.x + dx * 0.7; player.z = q.z + dz * 0.7; }
     const hit = personVsCars(player, 0.4, true);
     if (hit && hit.imp > 7 && player.down <= 0) { player.down = 1.6; player.vx = hit.vx * 0.7; player.vz = hit.vz * 0.7; player.vy = 4; shake = 0.6; crashSound(0.4); player.hp -= hit.imp * 1.6; if (player.hp <= 0) wasted(); }
     const rc = roadClear(player.x, player.z), gy = groundY(player.x, player.z) + (rc > 0 && rc < 3.4 ? 0.17 : 0);
@@ -3510,6 +3510,26 @@ function updateLighting(dt) {
   envT -= dt; if (envT <= 0 && Math.abs(day - lastEnvDay) > 0.04 || lastEnvDay < 0) { envT = 4; lastEnvDay = day; if (envRT) envRT.dispose(); envRT = pmrem.fromScene(skyScene, 0, 0.1, 200); scene.environment = envRT.texture; }
 }
 
+// ================= safety net =================
+// if anything ever turns a position into NaN the view goes blank; put the last good state back and say what broke
+const SANE = { x: 0, y: 0, z: 0, yaw: 0, pitch: 0.22, cx: 0, cy: 0, cz: 0 }; let saneMsgT = 0;
+function sanity() {
+  const bad = [];
+  const far = v => !isFinite(v) || Math.abs(v) > 1600;
+  if (far(player.x) || far(player.y) || far(player.z)) bad.push('player');
+  if (!isFinite(player.vx) || !isFinite(player.vz) || !isFinite(player.vy)) bad.push('vel');
+  if (player.car && (far(player.car.x) || far(player.car.z) || far(player.car.y) || !isFinite(player.car.h))) bad.push('car');
+  if (!isFinite(camYaw) || !isFinite(camPitch) || !isFinite(camZoom)) bad.push('cam');
+  const cp = camera.position; if (far(cp.x) || far(cp.y) || far(cp.z)) bad.push('view');
+  if (!bad.length) { SANE.x = player.x; SANE.y = player.y; SANE.z = player.z; SANE.yaw = camYaw; SANE.pitch = camPitch; SANE.cx = cp.x; SANE.cy = cp.y; SANE.cz = cp.z; return; }
+  if (bad.includes('player') || bad.includes('vel')) { player.x = SANE.x; player.y = SANE.y; player.z = SANE.z; player.vx = player.vy = player.vz = 0; }
+  if (bad.includes('car')) { const c = player.car; c.x = SANE.x; c.z = SANE.z; c.y = groundY(c.x, c.z); c.h = isFinite(c.h) ? c.h : 0; c.vx = c.vz = c.vy = 0; c.pitch = c.roll = 0; }
+  if (!isFinite(camYaw) || !isFinite(camPitch)) { camYaw = SANE.yaw; camPitch = SANE.pitch; } if (!isFinite(camZoom)) camZoom = 1;
+  camera.position.set(SANE.cx, SANE.cy, SANE.cz); camPos.copy(camera.position);
+  for (const q of peds.slice()) if (!isFinite(q.x) || !isFinite(q.z) || !isFinite(q.y)) q.remove();
+  if (now - saneMsgT > 5000) { saneMsgT = now; toast('Hiba javítva (' + bad.join(', ') + ' ' + [player.x, player.z, camera.position.x, camera.position.y].map(v => Math.round(v)).join('/') + ') – küldj róla képet Claude-nak!'); }
+}
+
 // ================= main loop =================
 let now = 0, lastT = 0, frame = 0, spawnT = 0;
 function step(dt) {
@@ -3537,6 +3557,7 @@ function loop(t) {
   if (!started || !renderer) return;
   const dt = Math.min(0.05, (t - lastT) / 1000 || 0.016); lastT = t;
   if (!paused && !mapOpen && !phoneOpen && !window.__hold) { now = t; gameT += dt; step(dt); }
+  sanity();
   updateLighting(paused ? 0 : dt); if (!window.__freeze) updateCamera(dt);
   scene.userData.sky.position.copy(camera.position);
   updateHUD(dt); if ((frame++ & 1) === 0) drawMinimap(); updateAudio();
@@ -3582,6 +3603,9 @@ function placeLandmarks() {
   const pol = nearestBuilding(RA3.cx + 40, RA3.cz, B => !B.used); POI.police = landmark(pol, 'RENDŐRSÉG', '#16326e', '#ffffff'); pol.used = true;
   const hos = nearestBuilding(RA4.cx + 40, RA4.cz - 20, B => !B.used); POI.hospital = landmark(hos, 'KÓRHÁZ', '#ffffff', '#e0202a'); hos.used = true;
 }
+// show script errors on screen so a screenshot tells what went wrong
+addEventListener('error', e => { try { toast('Hiba: ' + String(e.message).slice(0, 90)); } catch (er) {} });
+{ const ce = console.error.bind(console); let n = 0; console.error = (...a) => { ce(...a); if (n++ < 3) try { toast('Hiba: ' + a.map(String).join(' ').replace(/\s+/g, ' ').slice(0, 110)); } catch (er) {} }; }
 
 if (IS_TOUCH) document.body.classList.add('touch');
 $('helpDesk').classList.toggle('hidden', IS_TOUCH); $('helpTouch').classList.toggle('hidden', !IS_TOUCH);
