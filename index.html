@@ -63,6 +63,7 @@ kbd{background:#fff;color:#000;border-radius:4px;padding:0 5px;font-family:Arial
 #bust i{display:block;height:100%;background:linear-gradient(90deg,#2f6bff,#ff3030)}
 #topbtns{position:absolute;top:calc(12px + env(safe-area-inset-top));left:calc(234px + env(safe-area-inset-left));display:flex;gap:8px;pointer-events:auto}
 #topbtns button{width:46px;height:46px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(14,11,31,.5);font-size:20px;color:#fff}
+#topbtns .zb{font-size:26px;font-weight:800;line-height:1}
 /* touch controls, two layouts: on foot (joystick) and in car (arrows + pedals) */
 #touch{display:none}
 .touch #touch{display:block}
@@ -113,6 +114,7 @@ kbd{background:#fff;color:#000;border-radius:4px;padding:0 5px;font-family:Arial
 }
 /* very short boxes (the in-app viewer): keep the right column clear of the money/stars */
 @media (max-height:340px){
+ .touch #topbtns .zb{display:none}
  .touch #tAct{right:calc(200px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom))}
  .touch #tPunch{right:calc(96px + env(safe-area-inset-right));bottom:calc(92px + env(safe-area-inset-bottom))}
  .touch #tGas{height:128px}
@@ -159,12 +161,12 @@ kbd{background:#fff;color:#000;border-radius:4px;padding:0 5px;font-family:Arial
   <div id="heroPick"><span>Karakter:</span><button class="smallbtn hp" data-k="f">👩 Nő</button><button class="smallbtn hp" data-k="m">👨 Férfi</button></div>
   <div><button class="smallbtn" id="fsBtn">⛶ Teljes képernyő</button><button class="smallbtn" id="dlBtn" style="display:none">⬇ Letöltés a telefonra</button><button class="smallbtn" id="resetBtn">Új játék (mentés törlése)</button></div>
   <div class="help" id="helpDesk">
-    <b>Gyalog:</b> <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> mozgás · <kbd>Shift</kbd> futás · <kbd>Space</kbd> ugrás · <kbd>Q</kbd> ütés · <kbd>F</kbd> beszállás<br>
+    <b>Gyalog:</b> <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> mozgás · <kbd>Shift</kbd> futás · <kbd>Space</kbd> ugrás · <kbd>Q</kbd> ütés · <kbd>+</kbd>/<kbd>−</kbd> vagy egérgörgő: zoom · <kbd>F</kbd> beszállás<br>
     <b>Autóban:</b> <kbd>W</kbd> gáz · <kbd>S</kbd> fék/tolatás · <kbd>A</kbd>/<kbd>D</kbd> kormány · <kbd>Space</kbd> kézifék (drift!) · <kbd>H</kbd> duda<br>
     <b>Kamera:</b> húzd az egeret · <kbd>C</kbd> távolság · <b>Küldetések:</b> <kbd>P</kbd> · <b>Térkép + GPS:</b> <kbd>M</kbd> · <b>Szünet:</b> <kbd>Esc</kbd>
   </div>
   <div class="help" id="helpTouch">
-    <b>Telefonon:</b> gyalog bal joystick, 👊 ÜTÉS gomb, autóban ◀ ▶ kormány, a nagy GÁZ pedál felső fele előre, alsó fele hátra visz, FÉK, KÉZI = kézifék (drift). A képernyő húzásával forgatod a kamerát.<br>
+    <b>Telefonon:</b> gyalog bal joystick, 👊 ÜTÉS gomb, autóban ◀ ▶ kormány, a nagy GÁZ pedál felső fele előre, alsó fele hátra visz, FÉK, KÉZI = kézifék (drift). A képernyő húzásával forgatod a kamerát, két ujjal (csippentés) vagy a ＋ / － gombbal zoomolsz.<br>
     📱 küldetések · 🗺️ térkép, koppints egy helyre és a GPS odavezet
   </div>
 </div>
@@ -182,7 +184,7 @@ kbd{background:#fff;color:#000;border-radius:4px;padding:0 5px;font-family:Arial
   <div id="big"><h1></h1><h2></h2></div>
   <div id="hint"></div>
   <div id="toast"></div>
-  <div id="topbtns"><button id="bPhone" aria-label="Küldetések">📱</button><button id="bMap" aria-label="Térkép">🗺️</button><button id="bCam" aria-label="Kamera">🎥</button><button id="bPause" aria-label="Szünet">⏸</button><button id="bFs" aria-label="Teljes képernyő">⛶</button></div>
+  <div id="topbtns"><button id="bPhone" aria-label="Küldetések">📱</button><button id="bMap" aria-label="Térkép">🗺️</button><button id="bCam" aria-label="Kamera">🎥</button><button id="bZin" class="zb" aria-label="Közelítés">＋</button><button id="bZout" class="zb" aria-label="Távolítás">－</button><button id="bPause" aria-label="Szünet">⏸</button><button id="bFs" aria-label="Teljes képernyő">⛶</button></div>
   <div id="touch">
     <div id="joy"><div id="knob"></div></div>
     <div class="tbtn" id="tLeft">◀</div><div class="tbtn" id="tRight">▶</div>
@@ -229,7 +231,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 const T = THREE;
 const IS_TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 const $ = id => document.getElementById(id);
-const VERSION = '5', VERSION_DATE = '2026.10.22';
+const VERSION = '6', VERSION_DATE = '2026.10.24';
 const PAGE_SNAPSHOT = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
 
 // ================= save / settings =================
@@ -560,15 +562,16 @@ function addBoxCol(cx, cz, ax, az, hw, hd, h) {
 }
 function addCircCol(x, z, r, h = 12) { const o = { t: 1, x, z, r, h }; addCollider(o, x - r, z - r, x + r, z + r); return o; }
 function inBox(o, x, z, pad) { const dx = x - o.cx, dz = z - o.cz, lx = dx * o.ax + dz * o.az, lz = -dx * o.az + dz * o.ax; return Math.abs(lx) < o.hw + pad && Math.abs(lz) < o.hd + pad; }
-const _o = { x: 0, z: 0, nx: 0, nz: 0, hit: false };
+const _o = { x: 0, z: 0, nx: 0, nz: 0, hit: false, c: null };
 function staticPush(x, z, r, y = 0) {
-  const o = _o; o.hit = false; o.nx = 0; o.nz = 0;
+  const o = _o; o.hit = false; o.nx = 0; o.nz = 0; o.c = null;
   const a = CG.get(cgk(Math.floor(x / CGC), Math.floor(z / CGC)));
   if (a) for (const c of a) {
+    if (c.dead) continue;
     if (c.t === 1) {
       if (y > c.h) continue;
       let dx = x - c.x, dz = z - c.z; const rs = r + c.r, dd = dx * dx + dz * dz; if (dd >= rs * rs) continue;
-      const d = Math.sqrt(dd) || 0.001; dx /= d; dz /= d; x = c.x + dx * rs; z = c.z + dz * rs; o.nx += dx; o.nz += dz; o.hit = true;
+      const d = Math.sqrt(dd) || 0.001; dx /= d; dz /= d; x = c.x + dx * rs; z = c.z + dz * rs; o.nx += dx; o.nz += dz; o.hit = true; o.c = c;
     } else {
       if (y > c.h - 0.3) continue;
       const dx = x - c.cx, dz = z - c.cz; let lx = dx * c.ax + dz * c.az, lz = -dx * c.az + dz * c.ax;
@@ -665,7 +668,25 @@ function makeWater() {
 const PASTEL = [0xf7c6d9, 0xbfe7e1, 0xfde2b8, 0xc9d8f5, 0xf6f0e1, 0xffd4c2, 0xd6f0c8, 0xe9d3f5, 0xffffff, 0x9fdcd3, 0xfff1a8, 0xffb7c5];
 const ACCENT = [0xff4f9a, 0x1fc2c2, 0xffa53d, 0x3a7bd5, 0xff6f4f, 0x8b5cff, 0x22d18b];
 const POI = {};
-let ferris = null, lampGlow = null, signMats = [];
+let ferris = null, lampGlow = null, signMats = [], lampMesh = null;
+// ---------- street lamps knocked over by cars ----------
+const fallingLamps = [], _lq = new T.Quaternion(), _lq2 = new T.Quaternion(), _lv = new T.Vector3(), _lm = new T.Matrix4(), _lax = new T.Vector3(), _lone = new T.Vector3(1, 1, 1);
+function knockLamp(i, vx, vz) {
+  const l = LAMPS[i]; if (!l || l.fall) return;
+  const sp = Math.hypot(vx, vz) || 1; l.col.dead = true; l.fall = { t: 0, dx: vx / sp, dz: vz / sp, w: 0 }; fallingLamps.push(l);
+  const p = lampMesh.gg.attributes.position; p.setY(i, -500); p.needsUpdate = true; // its glow goes out
+}
+function updateLamps(dt) {
+  for (let k = fallingLamps.length - 1; k >= 0; k--) {
+    const l = fallingLamps[k], f = l.fall, i = l.col.lamp;
+    f.w += dt * 3.2; f.t = Math.min(PI / 2 - 0.03, f.t + f.w * dt); if (f.t >= PI / 2 - 0.03) fallingLamps.splice(k, 1);
+    _lax.set(f.dz, 0, -f.dx).normalize(); _lq.setFromAxisAngle(_lax, f.t); _lq2.setFromAxisAngle(_lv.set(0, 1, 0), l.ry).premultiply(_lq);
+    lampMesh.li.setMatrixAt(i, _lm.compose(_lv.set(l.x, l.y, l.z), _lq2, _lone));
+    _lv.set(Math.sin(l.ry) * 2.0, 6.95, Math.cos(l.ry) * 2.0).applyQuaternion(_lq); _lv.x += l.x; _lv.y += l.y; _lv.z += l.z;
+    lampMesh.hi.setMatrixAt(i, _lm.compose(_lv, _lq2, _lone));
+    lampMesh.li.instanceMatrix.needsUpdate = lampMesh.hi.instanceMatrix.needsUpdate = true;
+  }
+}
 function groundColor(x, z, h) {
   const sx = seaX(z), n = Math.sin(x * 0.031) * Math.cos(z * 0.027) + Math.sin(x * 0.11 + z * 0.07) * 0.4;
   const grass = C(0x5fae46).lerp(C(0x86c45a), 0.5 + 0.35 * n);
@@ -927,7 +948,7 @@ function placeProps() {
     for (let s = 8, i = 0; s < e.len - 6; s += step, i++) {
       const sg = (i % 2 ? 1 : -1) * (e.kind === 'blvd' ? 1 : 1), p = {}; edgeAt(e, s, sg * (e.w + (e.kind === 'hill' ? 1.2 : 0.7)), p);
       if (onOtherRoad(e, p.x, p.z, 0.8) || ringAt(p.x, p.z, 1)) continue;
-      LAMPS.push({ x: p.x, z: p.z, y: H(p.x, p.z), a: Math.atan2(-sg * p.tz * -1, sg * p.tx * -1), sg, tx: p.tx, tz: p.tz }); addCircCol(p.x, p.z, 0.22, 7);
+      const col = addCircCol(p.x, p.z, 0.22, 7); col.lamp = LAMPS.length; LAMPS.push({ x: p.x, z: p.z, y: H(p.x, p.z), a: Math.atan2(-sg * p.tz * -1, sg * p.tx * -1), sg, tx: p.tx, tz: p.tz, col });
     }
   }
   // hedges between the boulevard sidewalk and the beach
@@ -997,11 +1018,12 @@ function finishWorld() {
   const li = new T.InstancedMesh(lamp, M.plain, LAMPS.length), hi = new T.InstancedMesh(head, M.lampHead, LAMPS.length), gpos = [];
   LAMPS.forEach((l, i) => {
     const ry = Math.atan2(-l.sg * -l.tz, -l.sg * l.tx); // arm points toward the road
-    const m = mat4(l.x, l.y, l.z, ry); li.setMatrixAt(i, m);
+    const m = mat4(l.x, l.y, l.z, ry); li.setMatrixAt(i, m); l.ry = ry;
     const hx = l.x + Math.sin(ry) * 2.0, hz = l.z + Math.cos(ry) * 2.0; hi.setMatrixAt(i, mat4(hx, l.y + 6.95, hz, ry)); gpos.push(hx, l.y + 6.7, hz);
   });
   li.castShadow = true; scene.add(li, hi);
   const gg = new T.BufferGeometry(); gg.setAttribute('position', new T.Float32BufferAttribute(gpos, 3));
+  lampMesh = { li, hi, gg };
   lampGlow = new T.Points(gg, new T.PointsMaterial({ map: TEX.glow, size: 9, transparent: true, depthWrite: false, blending: T.AdditiveBlending, opacity: 0, color: 0xffd9a0 }));
   scene.add(lampGlow);
   // umbrellas
@@ -1814,6 +1836,13 @@ function carMaterials() {
   CM.glassLo = new T.MeshStandardMaterial({ color: 0x0d161e, metalness: 0.6, roughness: 0.08 });
   CM.trim = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.62, metalness: 0.1 });
   CM.chrome = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.14, metalness: 1 });
+  const beamTex = canvasTex(128, 256, (g, w, h) => {
+    g.filter = 'blur(10px)'; const gr = g.createLinearGradient(0, h, 0, 0); gr.addColorStop(0, 'rgba(255,240,205,.95)'); gr.addColorStop(0.35, 'rgba(255,236,195,.55)'); gr.addColorStop(1, 'rgba(255,230,180,0)');
+    g.fillStyle = gr; g.beginPath(); g.moveTo(w * 0.3, h); g.lineTo(w * 0.7, h); g.lineTo(w * 0.98, 12); g.lineTo(w * 0.02, 12); g.closePath(); g.fill();
+  });
+  CM.beam = new T.MeshBasicMaterial({ map: beamTex, color: 0xffe9c4, transparent: true, opacity: 0, depthWrite: false, blending: T.AdditiveBlending, polygonOffset: true, polygonOffsetFactor: -4, fog: true });
+  CM.beamGeo = new T.PlaneGeometry(1, 1).rotateX(-PI / 2).rotateY(PI);
+  CM.lampGlow = new T.PointsMaterial({ map: TEX.glow, size: 1.5, transparent: true, depthWrite: false, blending: T.AdditiveBlending, opacity: 0, color: 0xfff2d8 });
   CM.head = new T.MeshStandardMaterial({ color: 0xfffaf0, emissive: 0xfff2d0, emissiveIntensity: 0.6, roughness: 0.2 });
   CM.tail = new T.MeshStandardMaterial({ color: 0x8a0d10, emissive: 0xff1a1a, emissiveIntensity: 0.35, roughness: 0.25, metalness: 0.1 });
   CM.brake = new T.MeshStandardMaterial({ color: 0xff3030, emissive: 0xff2020, emissiveIntensity: 2.5, roughness: 0.3 });
@@ -1909,6 +1938,7 @@ function carGeos(id) {
   }
   res.roofY = d.gh ? (d.gh.convertible ? d.gh.top : B.yr((d.gh.b + d.gh.c) / 2)) : 1.3;
   res.B = B;
+  { const H = d.head, xs = Array.isArray(H.x) ? H.x : [H.x]; res.lampPts = []; for (const x of xs) for (const sg of [-1, 1]) res.lampPts.push(sg * x, H.y, B.reach(sg * x, H.y, 1) + 0.06); }
   // roof equipment shared by both versions
   const eq = new GB();
   if (d.police) { const z = (d.gh.b + d.gh.c) / 2 - 0.05, y = B.ghTop(z, 0); eq.geom(boxG(1.25, 0.07, 0.3), mat4(0, y + 0.03, z), C(0x141518)); for (const sg of [-1, 1]) eq.geom(boxG(0.06, 0.06, 0.22), mat4(sg * 0.5, y, z), C(0x141518)); res.sirenY = y + 0.13; res.sirenZ = z; }
@@ -1946,7 +1976,12 @@ function makeCarMesh(id, color) {
     const wl = new T.Mesh(G.lo.wheel.tire, CM.wheel); wl.scale.x = sx; wl.visible = false; wl.castShadow = shadows;
     piv.add(wh, wl); g.add(piv); wheels.push(wh, wl); wheelHi.push(wh); wheelLo.push(wl); if (k === 1) fronts.push(piv);
   }
-  return { mesh: g, body, hiG: hi, loG: lo, wheels, fronts, tails, sirens, driverFig, wheelHi, wheelLo, door };
+  // night driving: a glow on each headlamp and a pool of light on the road ahead
+  const lights = new T.Group(); lights.visible = false; body.add(lights);
+  const gg = new T.BufferGeometry(); gg.setAttribute('position', new T.Float32BufferAttribute(G.lampPts, 3));
+  lights.add(new T.Points(gg, CM.lampGlow));
+  const beam = new T.Mesh(CM.beamGeo, CM.beam); beam.scale.set(d.W * 2.2, 1, 16); beam.position.set(0, 0.07, d.L / 2 + 7.6); beam.renderOrder = 2; lights.add(beam);
+  return { mesh: g, body, hiG: hi, loG: lo, wheels, fronts, tails, sirens, driverFig, wheelHi, wheelLo, door, lights };
 }
 
 // ================= player character: a detailed, skinned figure (female or male) =================
@@ -2097,8 +2132,8 @@ function heroTextures() {
   return HERO_TEX;
 }
 // face painted on a cylindrical map around the head: u = 0.5 + angle/PI, v spans 0.3 m around eye level
-function heroFaceTex(D, kind, headSec, k) {
-  const S = 1024, hc = D.J.hc, cz = 0.012 * k;
+function heroFaceTex(D, kind, headSec, k, S = 1024) {
+  const hc = D.J.hc, cz = 0.012 * k;
   const px = (x, y) => { const s = headSec(hc + y), rx = s[0], z = s[1] * Math.sqrt(Math.max(0.02, 1 - (x / rx) ** 2)); const u = 0.5 + Math.atan2(x, z) / PI, v = (y + 0.15 * k) / (0.3 * k); return [u * S, (1 - v) * S]; };
   const F = (x, y) => px(x * k, y * k);
   const skin = '#' + new T.Color(D.skin).getHexString();
@@ -2164,8 +2199,10 @@ function heroFaceTex(D, kind, headSec, k) {
   });
 }
 // ---------- the character ----------
-function makeHero(kind) {
-  const D = HERO[kind], J = D.J, b = new HeroB(), low = QUALITY === 'low', DY = low ? 0.022 : 0.015, NB = low ? 18 : 24, k = J.hr / 0.1;
+function makeHero(kind, o = {}) {
+  // o.ped: a pedestrian template, much lighter (fewer rings, no small trims)
+  const D = o.D || HERO[kind], J = D.J, b = new HeroB(), ped = !!o.ped, low = ped || QUALITY === 'low', DY = ped ? 0.034 : low ? 0.022 : 0.015, NB = ped ? 12 : low ? 18 : 24, k = J.hr / 0.1;
+  const HR = ped ? 12 : low ? 20 : 30, HN = ped ? 16 : low ? 22 : 36;
   const tor = hTab(D.torso), leg = hTab(D.leg), arm = hTab(D.arm), skin = C(D.skin), fem = kind === 'f';
   const tex = heroTextures();
   // ---- skin weights ----
@@ -2216,6 +2253,7 @@ function makeHero(kind) {
     const wx = s * J.wrist[0], wy = J.wrist[1], hs = k;
     const hand = hTab([[0, 0.019, 0.024], [0.03, 0.016, 0.036, 0.03], [0.06, 0.0135, 0.04, 0.034], [0.085, 0.012, 0.038, 0.032], [0.1, 0.011, 0.036, 0.03], [0.13, 0.0095, 0.031, 0.026], [0.152, 0.007, 0.022, 0.018], [0.164, 0.004, 0.01, 0.008]].map(r => r.map(v => v * hs)));
     const hr = []; for (let i = 0; i <= 16; i++) { const d = 0.164 * hs * i / 16, sc = hSec(hand, d); const cu = Math.max(0, d - 0.075 * hs); hr.push({ c: [wx + s * 0.003 - s * cu * 0.35, wy - d + cu * cu * 4, 0.012 + cu * 0.75], U: [1, 0, 0], V: [0, 0, 1], rx: sc[0], rp: sc[1], rn: sc[2], v: d }); }
+    if (ped) { b.loft(hr.filter((r, i) => i % 2 === 0), { N: 8, col: skin, w: wArm, cap1: true }); continue; }
     b.loft(hr, { N: 16, col: skin, w: wArm, cap1: true });
     const th = t => [wx - s * (0.004 + 0.012 * t) * hs, wy - (0.022 + 0.066 * t) * hs, (0.024 + 0.024 * Math.sin(t * 1.6)) * hs];
     b.loft(hRowsCurve(th, 8, t => [0.0105 * hs * (1 - 0.3 * t), 0.0095 * hs * (1 - 0.3 * t)], () => [1, 0, 0]), { N: 10, col: skin, w: wArm, cap1: true });
@@ -2226,7 +2264,7 @@ function makeHero(kind) {
   const R = J.hr, hc = J.hc, hcz = 0.012 * k;
   const headSec = y => { const yy = (y - hc) / (R * 1.14), s = Math.sqrt(Math.max(0, 1 - yy * yy)), jaw = yy < 0 ? 1 - 0.2 * hsm(0.1, 1.0, -yy) : 1 - 0.06 * hsm(0.3, 1, yy); return [R * 0.86 * s * jaw, R * 0.98 * s * (yy < 0 ? 1 - 0.06 * hsm(0.2, 1, -yy) : 1), R * 1.04 * s]; };
   const hy0 = hc - R * 1.12, hy1 = hc + R * 1.135, headRows = [];
-  for (let i = 0; i <= (low ? 20 : 30); i++) { const y = lerp(hy0, hy1, i / (low ? 20 : 30)), s = headSec(y); headRows.push({ c: [0, y, hcz], U: [1, 0, 0], V: [0, 0, 1], rx: s[0], rp: s[1], rn: s[2], v: y }); }
+  for (let i = 0; i <= HR; i++) { const y = lerp(hy0, hy1, i / HR), s = headSec(y); headRows.push({ c: [0, y, hcz], U: [1, 0, 0], V: [0, 0, 1], rx: s[0], rp: s[1], rn: s[2], v: y }); }
   const g2 = (dx, dy, sx, sy) => Math.exp(-(dx * dx) / (sx * sx) - (dy * dy) / (sy * sy));
   const facePush = p => {
     if (p[2] <= hcz) return; const fx = p[0] / k, fy = (p[1] - hc) / k; let dz = 0;
@@ -2240,9 +2278,9 @@ function makeHero(kind) {
     p[2] += dz * k * hsm(0, 0.02, p[2] - hcz);
   };
   const faceUV = (p, j, N) => { const v = (p[1] - (hc - 0.15 * k)) / (0.3 * k); if (j === 0) return [1.5, v]; if (j === N) return [-0.5, v]; return [0.5 + Math.atan2(p[0], p[2] - hcz) / PI, v]; };
-  b.loft(headRows, { N: low ? 22 : 36, mat: 3, col: C(0xffffff), w: wHead, push: facePush, uvf: faceUV, cap0: true, cap1: true });
-  for (const s of [1, -1]) { const ey = hc - 0.008 * k, ex = headSec(ey)[0]; hEllipsoid(b, [s * (ex + 0.002), ey, hcz - 0.014 * k], 0.008 * k, 0.024 * k, 0.015 * k, 2, { N: 12, rows: 6, mat: 3, col: C(0xf0e0d8), w: wHead, uvf: () => [0.02, 0.5] }); }
-  if (fem) for (const s of [1, -1]) { const ey = hc - 0.036 * k, ex = headSec(ey)[0] + 0.006, c0 = [s * ex, ey - 0.014, hcz - 0.014 * k]; b.loft(hRowsCurve(t => [c0[0], c0[1] + 0.0125 * Math.cos(t * TAU), c0[2] + 0.0125 * Math.sin(t * TAU)], 18, () => [0.0017, 0.0017], () => [1, 0, 0]), { N: 6, col: C(0xd6a83a), w: wHead }); }
+  b.loft(headRows, { N: HN, mat: 3, col: C(0xffffff), w: wHead, push: facePush, uvf: faceUV, cap0: true, cap1: true });
+  if (!ped) for (const s of [1, -1]) { const ey = hc - 0.008 * k, ex = headSec(ey)[0]; hEllipsoid(b, [s * (ex + 0.002), ey, hcz - 0.014 * k], 0.008 * k, 0.024 * k, 0.015 * k, 2, { N: 12, rows: 6, mat: 3, col: C(0xf0e0d8), w: wHead, uvf: () => [0.02, 0.5] }); }
+  if (fem && !ped) for (const s of [1, -1]) { const ey = hc - 0.036 * k, ex = headSec(ey)[0] + 0.006, c0 = [s * ex, ey - 0.014, hcz - 0.014 * k]; b.loft(hRowsCurve(t => [c0[0], c0[1] + 0.0125 * Math.cos(t * TAU), c0[2] + 0.0125 * Math.sin(t * TAU)], 18, () => [0.0017, 0.0017], () => [1, 0, 0]), { N: 6, col: C(0xd6a83a), w: wHead }); }
   // ---- hair ----
   const hl = D.hairLine, hairH = phi => { for (let i = 0; i < hl.length - 1; i++) if (phi <= hl[i + 1][0]) return lerp(hl[i][1], hl[i + 1][1], (phi - hl[i][0]) / (hl[i + 1][0] - hl[i][0])); return hl[hl.length - 1][1]; };
   const hairCol = C(D.hair), hairPush = p => {
@@ -2251,7 +2289,7 @@ function makeHero(kind) {
     const inf = lerp(-0.007, th, hsm(h - 0.005, h + 0.007, yy)), n = v3nrm(d); p[0] += n[0] * inf; p[1] += n[1] * inf; p[2] += n[2] * inf;
   };
   const capRows = headRows.filter(r => r.v > hc - 0.1 * k).map(r => Object.assign({}, r));
-  b.loft(capRows, { N: low ? 26 : 40, mat: 4, col: hairCol, w: wHead, push: hairPush, uvS: 0.06, cap1: true });
+  b.loft(capRows, { N: ped ? 18 : low ? 26 : 40, mat: 4, col: hairCol, w: wHead, push: hairPush, uvS: 0.06, cap1: true });
   let tailPos = [0, hc + 0.08 * k, hcz - 0.07 * k];
   if (fem) {
     // high ponytail with a tie, a side-swept fringe and two face-framing strands
@@ -2259,15 +2297,15 @@ function makeHero(kind) {
     const bez = t => { const u = 1 - t; return [0, 1, 2].map(i => u * u * u * P0[i] + 3 * u * u * t * P1[i] + 3 * u * t * t * P2[i] + t * t * t * P3[i]); };
     const rad = t => { const r = (0.022 + 0.024 * hsm(0.06, 0.3, t) - 0.04 * hsm(0.45, 1, t)) * k; return [r * 1.15, r * 0.85]; };
     const wTail = p => { let best = 0, bd = 9; for (let i = 0; i <= 20; i++) { const q = bez(i / 20), d = (q[0] - p[0]) ** 2 + (q[1] - p[1]) ** 2 + (q[2] - p[2]) ** 2; if (d < bd) { bd = d; best = i / 20; } } return [B_HEAD, B_TAIL, hsm(0.02, 0.3, best)]; };
-    b.loft(hRowsCurve(bez, low ? 14 : 30, rad, () => [1, 0, 0], 0.02, 1), { N: low ? 10 : 16, mat: 4, col: hairCol, w: wTail, uvS: 0.05, cap1: true, cap0: true });
-    b.loft(hRowsCurve(bez, 5, () => [0.025 * k, 0.025 * k], () => [1, 0, 0], 0.03, 0.08), { N: 14, col: C(0x2a1a14), w: wHead });
+    b.loft(hRowsCurve(bez, ped ? 8 : low ? 14 : 30, rad, () => [1, 0, 0], 0.02, 1), { N: ped ? 8 : low ? 10 : 16, mat: 4, col: hairCol, w: wTail, uvS: 0.05, cap1: true, cap0: true });
+    if (!ped) b.loft(hRowsCurve(bez, 5, () => [0.025 * k, 0.025 * k], () => [1, 0, 0], 0.03, 0.08), { N: 14, col: C(0x2a1a14), w: wHead });
     const onHead = (x, y, lift) => { const s = headSec(y), rx = s[0], z = hcz + s[1] * Math.sqrt(Math.max(0.03, 1 - (x / rx) ** 2)); const n = v3nrm([x / rx / rx, 0, (z - hcz) / s[1] / s[1]]); return [x + n[0] * lift, y, z + n[2] * lift]; };
     const strand = (pts, w0, w1, th) => {
       const f = t => { const n = pts.length - 1, i = Math.min(n - 1, Math.floor(t * n)), u = t * n - i, a = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], d = pts[Math.min(n, i + 2)]; return [0, 1, 2].map(c => 0.5 * (2 * p1[c] + (p2[c] - a[c]) * u + (2 * a[c] - 5 * p1[c] + 4 * p2[c] - d[c]) * u * u + (3 * p1[c] - a[c] - 3 * p2[c] + d[c]) * u * u * u)); };
       b.loft(hRowsCurve(f, 16, t => [lerp(w0, w1, t), th * (1 - 0.5 * t)], (t, c) => { const n = v3nrm(v3sub(c, [0, hc, hcz])), tg = v3nrm(v3sub(f(Math.min(1, t + 0.02)), f(Math.max(0, t - 0.02)))); return v3cross(n, tg); }), { N: 8, mat: 4, col: hairCol, w: wHead, uvS: 0.05 });
     };
     const fr = [[0.012, 0.104, 0.012], [-0.02, 0.09, 0.013], [-0.05, 0.068, 0.013], [-0.072, 0.035, 0.013], [-0.082, 0.0, 0.012], [-0.084, -0.03, 0.012]];
-    for (const s of [1, -1]) strand([[0.074, 0.04], [0.082, 0.0], [0.084, -0.04], [0.08, -0.075]].map(q => onHead(s * q[0] * k, hc + q[1] * k, 0.009)), 0.012 * k, 0.006 * k, 0.005);
+    if (!ped) for (const s of [1, -1]) strand([[0.074, 0.04], [0.082, 0.0], [0.084, -0.04], [0.08, -0.075]].map(q => onHead(s * q[0] * k, hc + q[1] * k, 0.009)), 0.012 * k, 0.006 * k, 0.005);
   }
   // ---- shirt (blue gingham) ----
   const bust = hSec(tor, fem ? 1.24 : 1.26)[1];
@@ -2288,18 +2326,18 @@ function makeHero(kind) {
     const col = t => { if (t < 0.6) { const x = s * (0.004 + xTop * t / 0.6), y = D.vNeck[0] + D.vNeck[1] * Math.abs(x); return [x, y, torsoFront(x, y, 0.013) + 0.003]; } const a = (t - 0.6) / 0.4 * (PI / 2), y = D.shirtTop + 0.012, sc = hSec(tor, y); const ax = s * xTop, az = torsoFront(ax, D.shirtTop, 0.013); return [ax * Math.cos(a) + s * (sc[0] + 0.012) * Math.sin(a) * 0, lerp(D.shirtTop, y, Math.min(1, a * 2)), az * Math.cos(a) - (sc[2] + 0.014) * Math.sin(a)]; };
     b.loft(hRowsCurve(col, 22, t => [t < 0.6 ? 0.017 : 0.014, 0.0025], (t, c) => t < 0.6 ? [s, 0.25, 0] : [0, 1, 0]).map((r, i, A) => { const off = r.v < 0.6 ? 0.012 : 0.008; r.c = [r.c[0] + r.U[0] * off, r.c[1] + r.U[1] * off, r.c[2] + r.U[2] * off]; return r; }), { N: 8, mat: 1, col: C(0xffffff), w: wTorso, uvS: 0.026 });
   }
-  for (let y = D.vNeck[0] - 0.03; y > D.hem + 0.02; y -= 0.045) hEllipsoid(b, [0, y, torsoFront(0, y, shirtInf(PI / 2, { v: y, rp: hSec(tor, y)[1], rx: hSec(tor, y)[0] })) + 0.003], 0.0055, 0.0055, 0.003, 2, { N: 10, rows: 4, col: C(0xece6da), w: wTorso });
-  if (!fem) for (const s of [1, -1]) { const y = 1.335, x = s * 0.078, z = torsoFront(x, y, 0.016) - 0.002; hEllipsoid(b, [x, y, z], 0.031, 0.036, 0.004, 6, { N: 16, rows: 6, mat: 1, col: C(0xffffff), w: wTorso, uvS: 0.026 }); hEllipsoid(b, [x, y + 0.03, z + 0.004], 0.033, 0.011, 0.004, 6, { N: 16, rows: 4, mat: 1, col: C(0xe8eef8), w: wTorso, uvS: 0.026 }); }
+  if (!ped) for (let y = D.vNeck[0] - 0.03; y > D.hem + 0.02; y -= 0.045) hEllipsoid(b, [0, y, torsoFront(0, y, shirtInf(PI / 2, { v: y, rp: hSec(tor, y)[1], rx: hSec(tor, y)[0] })) + 0.003], 0.0055, 0.0055, 0.003, 2, { N: 10, rows: 4, col: C(0xece6da), w: wTorso });
+  if (!fem && !ped) for (const s of [1, -1]) { const y = 1.335, x = s * 0.078, z = torsoFront(x, y, 0.016) - 0.002; hEllipsoid(b, [x, y, z], 0.031, 0.036, 0.004, 6, { N: 16, rows: 6, mat: 1, col: C(0xffffff), w: wTorso, uvS: 0.026 }); hEllipsoid(b, [x, y + 0.03, z + 0.004], 0.033, 0.011, 0.004, 6, { N: 16, rows: 4, mat: 1, col: C(0xe8eef8), w: wTorso, uvS: 0.026 }); }
   // ---- shorts or jeans, belt ----
   const den = C(0xffffff);
   b.loft(hRowsY(tor, tor[0][0], D.beltY + 0.012, DY, z0, z0, 2.4), { N: NB + 6, mat: 2, col: den, w: wTorso, inf: () => fem ? 0.011 : 0.015, uvS: 0.05, cap0: true });
   for (const s of [1, -1]) {
     const yb = fem ? D.shorts : 0.095;
     b.loft(hRowsY(leg, yb, J.hip[1] + 0.03, DY, legX(s), z0), { N: NB, mat: 2, col: den, w: wLegS(s), uvS: 0.05, inf: (a, r) => fem ? 0.013 + 0.004 * hsm(yb + 0.02, yb, r.v) : 0.016 + Math.max(0, 0.064 - r.rx) * hsm(J.knee + 0.08, J.knee - 0.02, r.v) + 0.006 * hsm(0.13, 0.1, r.v) });
-    if (fem) b.loft(hRowsY(leg, yb - 0.012, yb + 0.002, 0.004, legX(s), z0), { N: NB + 10, col: C(0xd2deec), w: wLegS(s), inf: (a, r) => 0.012 + 0.003 * Math.sin(a * 23 + s) * hsm(yb, yb - 0.012, r.v) });
+    if (fem && !ped) b.loft(hRowsY(leg, yb - 0.012, yb + 0.002, 0.004, legX(s), z0), { N: NB + 10, col: C(0xd2deec), w: wLegS(s), inf: (a, r) => 0.012 + 0.003 * Math.sin(a * 23 + s) * hsm(yb, yb - 0.012, r.v) });
   }
   b.loft(hRowsY(tor, D.beltY - 0.016, D.beltY + 0.016, 0.008, z0, z0, 2.4), { N: NB + 6, col: C(D.belt), w: wTorso, inf: () => fem ? 0.019 : 0.023 });
-  hEllipsoid(b, [0, D.beltY, torsoFront(0, D.beltY, fem ? 0.02 : 0.024) + 0.004], 0.022, 0.017, 0.004, 5, { N: 16, rows: 6, col: C(0xcfc6b0), w: wTorso });
+  if (!ped) hEllipsoid(b, [0, D.beltY, torsoFront(0, D.beltY, fem ? 0.02 : 0.024) + 0.004], 0.022, 0.017, 0.004, 5, { N: 16, rows: 6, col: C(0xcfc6b0), w: wTorso });
   // ---- boots ----
   const bs = fem ? 1 : 1.1;
   for (const s of [1, -1]) {
@@ -2307,7 +2345,7 @@ function makeHero(kind) {
     const fr = foot.map(f => ({ c: [ax, f[4] * bs, f[0] * bs], U: [1, 0, 0], V: [0, 1, 0], rx: f[1] * bs, rp: f[2] * bs, rn: f[3] * bs, v: f[0], ex: 2.6 }));
     b.loft(fr, { N: 20, col: C(D.boot), w: wFoot, cap0: true, cap1: true });
     b.loft(foot.map(f => ({ c: [ax, 0.011, f[0] * bs + 0.002], U: [1, 0, 0], V: [0, 1, 0], rx: f[1] * bs + 0.004, rp: 0.006, rn: 0.011, v: f[0], ex: 3 })), { N: 16, col: C(0x221810), w: wFoot, cap0: true, cap1: true });
-    if (fem) hEllipsoid(b, [ax, 0.026, -0.042], 0.021, 0.026, 0.02, 4, { N: 12, rows: 5, col: C(0x221810), w: wFoot });
+    if (fem && !ped) hEllipsoid(b, [ax, 0.026, -0.042], 0.021, 0.026, 0.02, 4, { N: 12, rows: 5, col: C(0x221810), w: wFoot });
     b.loft(hRowsY([[0.02, 0.044 * bs, 0.05 * bs, 0.052 * bs], [D.bootTop, 0.046 * bs, 0.05 * bs, 0.052 * bs]], 0.05, D.bootTop, 0.012, () => ax, () => -0.006), { N: 20, col: C(D.boot), w: wFoot, inf: (a, r) => 0.004 * hsm(D.bootTop - 0.03, D.bootTop, r.v) });
   }
   // ---- skeleton ----
@@ -2318,7 +2356,7 @@ function makeHero(kind) {
     [0, [-J.hip[0], J.hip[1], 0]], [15, [-J.hip[0] + 0.008, J.knee, 0]], [16, [-J.hip[0] + 0.012, J.ankle, 0]]];
   const bones = BP.map(() => new T.Bone());
   BP.forEach(([par, p], i) => { const pp = par < 0 ? [0, 0, 0] : BP[par][1]; bones[i].position.set(p[0] - pp[0], p[1] - pp[1], p[2] - pp[2]); bones[i].name = HBN[i]; if (par >= 0) bones[par].add(bones[i]); });
-  const faceTex = heroFaceTex(D, kind, headSec, k);
+  const faceTex = heroFaceTex(D, kind, headSec, k, ped ? 256 : 1024);
   const mats = [
     new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.55, metalness: 0.02 }),
     new T.MeshStandardMaterial({ map: tex.ging, vertexColors: true, roughness: 0.85 }),
@@ -2329,9 +2367,9 @@ function makeHero(kind) {
   mats[3].map.wrapS = mats[3].map.wrapT = T.ClampToEdgeWrapping;
   const geo = b.build(), mesh = new T.SkinnedMesh(geo, mats);
   mesh.add(bones[0]); mesh.bind(new T.Skeleton(bones)); mesh.frustumCulled = false;
-  if (QUALITY !== 'low') mesh.castShadow = true;
+  if (QUALITY !== 'low' && !ped) mesh.castShadow = true;
   const g = new T.Group(); g.rotation.order = 'YXZ'; g.add(mesh);
-  const h = { g, mesh, bones, J, kind, D, tris: geo.index.count / 3 };
+  const h = { g, mesh, bones, J, kind, D, tris: geo.index.count / 3, par: BP.map(q => q[0]), mats };
   heroApply(h, HPOSE.stand);
   return h;
 }
@@ -2395,6 +2433,43 @@ function punchPose(base, t, right) {
   P.chest = [c[0] + 0.05 * k, c[1] - s * 0.45 * k, c[2]]; P.hips = [h[0], h[1] - s * 0.15 * k, h[2]];
   return P;
 }
+
+// ---------- pedestrians: the same figure, lighter, in many looks ----------
+// one template geometry per body type and skin tone; each pedestrian gets its own skeleton and tinted materials
+const PED_SKIN = [[0xe7b48e, '#4a6f9a', '#b8505c'], [0xc98b64, '#5a3a22', '#a8454f'], [0xa86d48, '#3d2a1a', '#8f3f46'], [0x7a4a30, '#2a1d14', '#7a3a3a']];
+const PED_HAIR = [0x2a1a10, 0x4a2c14, 0x8a5a2f, 0xd8b060, 0x111111, 0x6b2a14, 0x9a9a98];
+const PED_SHIRT = [0xffffff, 0xff8fb0, 0x9fe0e6, 0xffe08a, 0xffb58a, 0xc5b5ff, 0xa8f0c8, 0xf4f1e8, 0x9cc0f0, 0xff6f6f];
+const PED_PANTS = [[0xffffff, 'denim'], [0x8aa0c8, 'denim'], [0x404040, 'denim'], [0x2c3e50, 'twill'], [0xd6c4a0, 'twill'], [0xe8e2d0, 'twill'], [0x5a5a5a, 'twill']];
+const PED_TPL = {};
+function pedTextures() {
+  const t = heroTextures(); if (t.stripe) return t;
+  t.stripe = heroCanvas(64, 64, (g) => { g.fillStyle = '#ffffff'; g.fillRect(0, 0, 64, 64); g.fillStyle = 'rgba(40,50,70,.35)'; for (let y = 0; y < 64; y += 16) g.fillRect(0, y, 64, 6); }, true);
+  t.twill = heroCanvas(64, 64, (g) => { g.fillStyle = '#e8e8e8'; g.fillRect(0, 0, 64, 64); g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = 2; for (let i = -64; i < 64; i += 6) { g.beginPath(); g.moveTo(i, 64); g.lineTo(i + 64, 0); g.stroke(); } }, true);
+  return t;
+}
+function makePedHero(kind, look) {
+  const key = kind + look.skin;
+  let base = PED_TPL[key];
+  if (!base) { const S = PED_SKIN[look.skin]; base = PED_TPL[key] = makeHero(kind, { ped: true, D: Object.assign({}, HERO[kind], { skin: S[0], eye: S[1], lip: kind === 'f' ? S[2] : '#8a5a4c' }) }); }
+  const tex = pedTextures(), bones = base.bones.map((b0, i) => { const b = new T.Bone(); b.position.copy(b0.position); b.name = b0.name; return b; });
+  base.par.forEach((p, i) => { if (p >= 0) bones[p].add(bones[i]); });
+  const m = base.mats, mats = [m[0], m[1].clone(), m[2].clone(), m[3], m[4].clone()];
+  mats[1].map = look.shirtTex === 'plain' ? null : tex[look.shirtTex]; mats[1].color.set(look.shirt);
+  mats[2].map = tex[look.pantsTex]; mats[2].color.set(look.pants);
+  mats[4].color.set(look.hair);
+  const mesh = new T.SkinnedMesh(base.mesh.geometry, mats);
+  mesh.add(bones[0]); mesh.bind(new T.Skeleton(bones)); mesh.frustumCulled = false;
+  if (QUALITY === 'high') mesh.castShadow = true;
+  const g = new T.Group(); g.rotation.order = 'YXZ'; g.add(mesh); g.scale.setScalar(look.size);
+  const h = { g, mesh, bones, J: base.J, kind, D: base.D, tris: base.tris };
+  heroApply(h, HPOSE.stand);
+  return h;
+}
+function randomPedLook() {
+  const pp = rpick(PED_PANTS), st = R();
+  return { skin: Math.floor(R() * PED_SKIN.length), hair: rpick(PED_HAIR), shirt: rpick(PED_SHIRT), shirtTex: st < 0.4 ? 'ging' : st < 0.7 ? 'stripe' : 'plain', pants: pp[0], pantsTex: pp[1], size: RR(0.95, 1.06) };
+}
+function downPose() { return { spine: [-0.1, 0, 0], neck: [-0.2, 0.3, 0], uaL: [-0.3, 0, 1.1], laL: [-0.4, 0, 0], uaR: [0.2, 0, -1.0], laR: [-0.3, 0, 0], thL: [-0.3, 0, 0.2], shL: [0.5, 0, 0], thR: [0.05, 0, -0.1], shR: [0.1, 0, 0], tail: [-0.6, 0, 0] }; }
 const LOD_D2 = (QUALITY === 'high' ? 60 : QUALITY === 'mid' ? 36 : 22) ** 2;
 class Car {
   constructor(id, color, x, z, h) {
@@ -2461,6 +2536,7 @@ class Car {
     this.wheelRot += this.vf * dt / this.s.wr; for (const w of this.wheels) w.rotation.x = this.wheelRot;
     for (const f of this.fronts) f.rotation.y = -this.steer * 0.5;
     for (const t of this.tails) t.material = this.braking ? CM.brake : CM.tail;
+    this.lights.visible = dayF < 0.7 && !!this.driver && this.health > 0;
     if (this.driverFig) this.driverFig.visible = !!this.driver && this.driver !== 'player';
     if (this.sirens) {
       if (this.siren) { const ph = (now * 0.008) % 2 < 1; this.sirens[0].material = ph ? CM.sirR : CM.sirOff; this.sirens[1].material = ph ? CM.sirOffB : CM.sirB; }
@@ -2485,6 +2561,12 @@ function carStatic(car) {
   for (const sgn of [1, -1]) {
     const fx = Math.sin(car.h), fz = Math.cos(car.h), px = car.x + fx * car.off * sgn, pz = car.z + fz * car.off * sgn;
     const o = staticPush(px, pz, car.r, car.y - H(car.x, car.z)); if (!o.hit) continue;
+    // a street lamp gives way: it falls over and the car only loses a little speed
+    if (o.c && o.c.lamp != null && car.speed() > 3.5) {
+      knockLamp(o.c.lamp, car.vx, car.vz); car.vx *= 0.8; car.vz *= 0.8; car.health = Math.max(0, car.health - 1.5);
+      if (car.driver === 'player') { shake = Math.min(1, shake + 0.25); crashSound(0.35); }
+      continue;
+    }
     car.x += o.x - px; car.z += o.z - pz;
     const vn = car.vx * o.nx + car.vz * o.nz;
     if (vn < 0) { car.vx -= 1.35 * vn * o.nx; car.vz -= 1.35 * vn * o.nz; car.vx *= 0.85; car.vz *= 0.85; onImpact(car, -vn, null); }
@@ -2566,7 +2648,7 @@ function animHuman(m, phase, amt) { const s = Math.sin(phase) * amt; m.lL.rotati
 const walkable = e => e.kind === 'street' || e.kind === 'blvd';
 class Ped {
   constructor(e, s, side, dir) {
-    this.m = makeHuman(rpick(SHIRTS), rpick(PANTS), rpick(SKINS), rpick(HAIRS), R() < 0.2 ? rpick([0xffffff, 0xff4f8a, 0x2fc6d0]) : null);
+    this.look = randomPedLook(); this.m = makePedHero(R() < 0.5 ? 'f' : 'm', this.look); this.lo = null; this.near = true;
     scene.add(this.m.g); peds.push(this);
     this.e = e; this.s = s; this.side = side; this.dir = dir; this.lane = e.w + RR(1.0, 2.6); this.sp = RR(1.1, 1.6);
     this.state = 'walk'; this.t = 0; this.phase = R() * 6; this.vx = 0; this.vz = 0; this.vy = 0; this.y = 0; this.h = 0;
@@ -2575,7 +2657,9 @@ class Ped {
   update(dt) {
     const m = this.m;
     if (this.state === 'walk') {
-      this.s += this.dir * this.sp * dt;
+      // wait for the player standing in the way
+      const blk = !player.car && player.down <= 0 && d2(player.x, player.z, this.x, this.z) < 0.9 && (player.x - this.x) * Math.sin(this.h) + (player.z - this.z) * Math.cos(this.h) > 0;
+      if (!blk) this.s += this.dir * this.sp * dt;
       if (this.s < 0 || this.s > this.e.len) {
         const node = this.s < 0 ? this.e.a : this.e.b, opts = node.edges.filter(f => f !== this.e && walkable(f));
         if (opts.length) { const f = rpick(opts); this.e = f; if (f.a === node) { this.s = 0; this.dir = 1; } else { this.s = f.len; this.dir = -1; } this.lane = f.w + RR(1.0, 2.6); }
@@ -2586,18 +2670,18 @@ class Ped {
       if (d2(p.x, p.z, this.x, this.z) > 0.0001) this.h += angDiff(this.h, nh) * Math.min(1, dt * 8);
       if (d2(p.x, p.z, this.x, this.z) > 9) { this.x = p.x; this.z = p.z; }
       else { this.x = lerp(this.x, p.x, Math.min(1, dt * 6)); this.z = lerp(this.z, p.z, Math.min(1, dt * 6)); }
-      this.y = H(this.x, this.z) + 0.17; this.phase += dt * this.sp * 2.6; animHuman(m, this.phase, 0.55);
+      this.y = H(this.x, this.z) + 0.17; if (!blk) this.phase += dt * this.sp * 3.4; this.pose(walkPose(m, this.phase, blk ? 0 : 0.8, false, now / 1000));
     } else if (this.state === 'flee') {
       this.t -= dt; const sp = 5.5; this.x += Math.sin(this.h) * sp * dt; this.z += Math.cos(this.h) * sp * dt;
       const o = staticPush(this.x, this.z, 0.35); if (o.hit) this.h += 1.5; this.x = o.x; this.z = o.z;
       this.y = groundY(this.x, this.z) + (roadClear(this.x, this.z) > 0 && roadClear(this.x, this.z) < 3.4 ? 0.17 : 0);
-      this.phase += dt * 9; animHuman(m, this.phase, 1);
+      this.phase += dt * 8; this.pose(walkPose(m, this.phase, 1, true, 0));
       if (this.t <= 0) this.resnap();
     } else if (this.state === 'down') {
       this.t -= dt; this.vy -= 20 * dt; this.x += this.vx * dt; this.z += this.vz * dt; this.y += this.vy * dt;
       const g = groundY(this.x, this.z); if (this.y < g) { this.y = g; this.vy = 0; this.vx *= 0.8; this.vz *= 0.8; }
       const o = staticPush(this.x, this.z, 0.3); this.x = o.x; this.z = o.z;
-      m.g.rotation.x = lerp(m.g.rotation.x, -PI / 2, Math.min(1, dt * 8));
+      m.g.rotation.x = lerp(m.g.rotation.x, -PI / 2, Math.min(1, dt * 8)); this.pose(downPose(), true);
       if (this.t <= 0) { m.g.rotation.x = 0; this.state = 'flee'; this.t = 4; }
     }
     if (this.state !== 'down') {
@@ -2605,7 +2689,20 @@ class Ped {
       if (hit && hit.imp > 6) this.knock(hit);
       else if (this.state === 'walk') for (const c of cars) if (c.driver === 'player' && c.speed() > 4 && d2(c.x, c.z, this.x, this.z) < 64 && roadClear(c.x, c.z) > 0.5) { this.flee(c.x, c.z); break; }
     }
-    m.g.position.set(this.x, this.y, this.z); m.g.rotation.y = this.h;
+    m.g.position.set(this.x, this.y + (this.state === 'down' ? 0.1 : 0), this.z); m.g.rotation.y = this.h;
+    if (this.lo) { this.lo.g.position.copy(m.g.position); this.lo.g.rotation.set(m.g.rotation.x, this.h, 0); }
+  }
+  // far away the pose is refreshed less often and the figure hides in the fog
+  // up close the detailed figure, further away the old light one in the same colours
+  pose(P, force) {
+    const dx = this.x - camera.position.x, dz = this.z - camera.position.z, d = dx * dx + dz * dz, near = d < (this.near ? 46 * 46 : 40 * 40);
+    if (near !== this.near) {
+      this.near = near;
+      if (!near && !this.lo) { const L = this.look; this.lo = makeHuman(L.shirt, L.pantsTex === 'denim' ? (L.pants === 0xffffff ? 0x4a6fa5 : L.pants) : L.pants, PED_SKIN[L.skin][0], L.hair, null); this.lo.g.scale.setScalar(0.92 * L.size); scene.add(this.lo.g); }
+    }
+    this.m.g.visible = near; if (this.lo) this.lo.g.visible = !near && d < 150 * 150;
+    if (near) heroApply(this.m, P);
+    else if (this.lo) { const s = this.state === 'down' ? 0 : Math.sin(this.phase) * (this.state === 'flee' ? 1 : 0.55); this.lo.lL.rotation.x = s; this.lo.lR.rotation.x = -s; this.lo.aL.rotation.x = -s * 0.8; this.lo.aR.rotation.x = s * 0.8; }
   }
   knock(hit) {
     this.state = 'down'; this.t = 4; this.vx = hit.vx * 0.7; this.vz = hit.vz * 0.7; this.vy = 3 + hit.imp * 0.15;
@@ -2616,9 +2713,9 @@ class Ped {
   resnap() {
     const o = nearestRoad(this.x, this.z, 3);
     if (!o.e || !walkable(o.e)) { this.remove(); return; }
-    this.e = o.e; this.s = o.e.P[o.k].s; this.side = o.side; this.dir = R() < 0.5 ? 1 : -1; this.state = 'walk'; this.m.g.rotation.x = 0;
+    this.e = o.e; this.s = o.e.P[o.k].s; this.side = o.side; this.dir = R() < 0.5 ? 1 : -1; this.state = 'walk'; this.m.g.rotation.x = 0; if (this.lo) this.lo.g.rotation.x = 0;
   }
-  remove() { scene.remove(this.m.g); const i = peds.indexOf(this); if (i >= 0) peds.splice(i, 1); this.gone = true; }
+  remove() { scene.remove(this.m.g); if (this.lo) scene.remove(this.lo.g); const i = peds.indexOf(this); if (i >= 0) peds.splice(i, 1); this.gone = true; }
 }
 
 // ================= routing (Dijkstra over the road graph) =================
@@ -2837,7 +2934,8 @@ function manageSpawns(dt) {
 const keys = {};
 let actPressed = false, punchPressed = false, camInputT = 0;
 const touchIn = { jx: 0, jy: 0, steer: 0, gas: false, rev: false, brake: false, hand: false, jump: false, sprint: false, horn: false };
-let camYaw = 0, camPitch = 0.22, camDistIdx = 1;
+let camYaw = 0, camPitch = 0.22, camDistIdx = 1, camZoom = 1;
+const zoomBy = f => { camZoom = clamp(camZoom * f, 0.4, 2.6); };
 const CAM_D = [[3.6, 5.6], [5.2, 7.6], [7.5, 11]];
 addEventListener('keydown', e => {
   if (!started) return;
@@ -2855,6 +2953,7 @@ function onKeyPress(k) {
   if (k === 'KeyP' || k === 'Tab') togglePhone();
   if (k === 'KeyM') toggleMap();
   if (k === 'KeyC') camDistIdx = (camDistIdx + 1) % 3;
+  if (k === 'Equal' || k === 'NumpadAdd') zoomBy(1 / 1.2); if (k === 'Minus' || k === 'NumpadSubtract') zoomBy(1.2);
 }
 function readInput() {
   let x = 0, y = 0;
@@ -2868,6 +2967,7 @@ function setupPointer(canvas) {
   let drag = false;
   canvas.addEventListener('mousedown', () => { drag = true; });
   addEventListener('mouseup', () => { drag = false; });
+  canvas.addEventListener('wheel', e => { e.preventDefault(); zoomBy(Math.exp(e.deltaY * 0.0012)); }, { passive: false });
   addEventListener('mousemove', e => { if (!started || paused || !drag) return; camYaw -= e.movementX * 0.004; camPitch = clamp(camPitch + e.movementY * 0.003, -0.15, 1.1); camInputT = 1.5; });
 }
 function setupTouch() {
@@ -2876,10 +2976,14 @@ function setupTouch() {
   joy.addEventListener('touchstart', e => { e.preventDefault(); const t = e.changedTouches[0]; jid = t.identifier; const r = joy.getBoundingClientRect(); jcx = r.left + r.width / 2; jcy = r.top + r.height / 2; moveJoy(t); }, { passive: false });
   function moveJoy(t) { let dx = t.clientX - jcx, dy = t.clientY - jcy; const d = Math.hypot(dx, dy); if (d > R0) { dx *= R0 / d; dy *= R0 / d; } knob.style.transform = `translate(${dx}px,${dy}px)`; touchIn.jx = curve(dx / R0); touchIn.jy = curve(-dy / R0); }
   let camId = null, camX = 0, camY = 0;
-  addEventListener('touchmove', e => { for (const t of e.changedTouches) { if (t.identifier === jid) moveJoy(t); else if (t.identifier === camId) { camYaw -= (t.clientX - camX) * 0.006; camPitch = clamp(camPitch + (t.clientY - camY) * 0.004, -0.15, 1.1); camX = t.clientX; camY = t.clientY; camInputT = 1.5; } } }, { passive: false });
-  const end = e => { for (const t of e.changedTouches) { if (t.identifier === jid) { jid = null; touchIn.jx = touchIn.jy = 0; knob.style.transform = ''; } if (t.identifier === camId) camId = null; } };
+  // two fingers on the view pinch to zoom
+  const GT = new Map(); let pinch = 0, pinchZ = 1;
+  const pdist = () => { const [a, b] = [...GT.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+  addEventListener('touchmove', e => { for (const t of e.changedTouches) if (GT.has(t.identifier)) GT.set(t.identifier, { x: t.clientX, y: t.clientY }); if (pinch && GT.size === 2) { camZoom = clamp(pinchZ * pinch / pdist(), 0.4, 2.6); } }, { passive: false });
+  addEventListener('touchmove', e => { for (const t of e.changedTouches) { if (t.identifier === jid) moveJoy(t); else if (t.identifier === camId && !pinch) { camYaw -= (t.clientX - camX) * 0.006; camPitch = clamp(camPitch + (t.clientY - camY) * 0.004, -0.15, 1.1); camX = t.clientX; camY = t.clientY; camInputT = 1.5; } } }, { passive: false });
+  const end = e => { for (const t of e.changedTouches) { GT.delete(t.identifier); if (GT.size < 2) pinch = 0; if (t.identifier === jid) { jid = null; touchIn.jx = touchIn.jy = 0; knob.style.transform = ''; } if (t.identifier === camId) camId = null; } };
   addEventListener('touchend', end); addEventListener('touchcancel', end);
-  $('game').addEventListener('touchstart', e => { e.preventDefault(); for (const t of e.changedTouches) if (camId === null) { camId = t.identifier; camX = t.clientX; camY = t.clientY; } }, { passive: false });
+  $('game').addEventListener('touchstart', e => { e.preventDefault(); for (const t of e.changedTouches) { GT.set(t.identifier, { x: t.clientX, y: t.clientY }); if (camId === null) { camId = t.identifier; camX = t.clientX; camY = t.clientY; } } if (GT.size === 2) { pinch = pdist(); pinchZ = camZoom; camId = null; } }, { passive: false });
   const hold = (id, on, off) => { const el = $(id); el.addEventListener('touchstart', e => { e.preventDefault(); on(); el.classList.add('on'); }, { passive: false }); const up = e => { e.preventDefault(); off(); el.classList.remove('on'); }; el.addEventListener('touchend', up); el.addEventListener('touchcancel', up); };
   let sl = 0, sr = 0; const st = () => { touchIn.steer = sr - sl; };
   hold('tLeft', () => { sl = 1; st(); }, () => { sl = 0; st(); }); hold('tRight', () => { sr = 1; st(); }, () => { sr = 0; st(); });
@@ -3079,6 +3183,8 @@ function updatePlayer(dt, inp) {
     player.x += player.vx * dt; player.z += player.vz * dt;
     if (H(player.x, player.z) < WATER_Y - 1.1 && !inPier(player.x, player.z)) { player.x -= player.vx * dt; player.z -= player.vz * dt; }
     const o = staticPush(player.x, player.z, 0.4, player.y - H(player.x, player.z)); player.x = o.x; player.z = o.z;
+    // people are solid: the player slides around them instead of walking through
+    for (const q of peds) { if (q.state === 'down') continue; let dx = player.x - q.x, dz = player.z - q.z; const dd = dx * dx + dz * dz; if (dd > 0.49 || Math.abs(q.y - player.y) > 1.2) continue; const d = Math.sqrt(dd) || 0.01; dx /= d; dz /= d; player.x = q.x + dx * 0.7; player.z = q.z + dz * 0.7; }
     const hit = personVsCars(player, 0.4, true);
     if (hit && hit.imp > 7 && player.down <= 0) { player.down = 1.6; player.vx = hit.vx * 0.7; player.vz = hit.vz * 0.7; player.vy = 4; shake = 0.6; crashSound(0.4); player.hp -= hit.imp * 1.6; if (player.hp <= 0) wasted(); }
     const rc = roadClear(player.x, player.z), gy = groundY(player.x, player.z) + (rc > 0 && rc < 3.4 ? 0.17 : 0);
@@ -3118,9 +3224,9 @@ function updateCamera(dt) {
   if (c) {
     tx = c.x; ty = c.y + 1.5; tz = c.z;
     if (camInputT <= 0 && c.speed() > 1.5) { const want = c.vf < -2 ? c.h + PI : c.h; camYaw += angDiff(camYaw, want) * Math.min(1, dt * 3); camPitch = lerp(camPitch, 0.2, Math.min(1, dt * 1.5)); }
-    dist = CAM_D[camDistIdx][1] * (c.s.len / 4.5) ** 0.5 * 1.05; camFov = lerp(camFov, 60 + Math.min(16, c.speed() * 0.35), Math.min(1, dt * 3));
+    dist = CAM_D[camDistIdx][1] * (c.s.len / 4.5) ** 0.5 * 1.05 * camZoom; camFov = lerp(camFov, 60 + Math.min(16, c.speed() * 0.35), Math.min(1, dt * 3));
   } else {
-    tx = player.x; ty = player.y + 1.65; tz = player.z; dist = CAM_D[camDistIdx][0]; camFov = lerp(camFov, 62, Math.min(1, dt * 3));
+    tx = player.x; ty = player.y + 1.65; tz = player.z; dist = CAM_D[camDistIdx][0] * camZoom; camFov = lerp(camFov, 62, Math.min(1, dt * 3));
     if (camInputT <= 0 && Math.hypot(player.vx, player.vz) > 2) camYaw += angDiff(camYaw, player.h) * Math.min(1, dt * 0.9);
   }
   camTarget.set(tx, ty, tz);
@@ -3397,8 +3503,8 @@ function updateLighting(dt) {
   waterMat.uniforms.deep.value.set(0x0b5f86).lerp(C(0x04142a), 1 - day); waterMat.uniforms.shallow.value.set(0x2fd3c8).lerp(C(0x0a3040), 1 - day);
   const n = 1 - day;
   M.wall.emissiveIntensity = n * 1.3; M.glass.emissiveIntensity = n * 1.1; M.lampHead.emissiveIntensity = 0.1 + n * 3; M.neon.emissiveIntensity = 0.35 + n * 2.2; lampGlow.material.opacity = n * 0.9;
-  CM.head.emissiveIntensity = 0.5 + n * 2.5; CM.tail.emissiveIntensity = 0.35 + n * 1.2; for (const m of signMats) m.emissiveIntensity = 0.35 + n * 1.6;
-  if (headlight) { const c = player.car; headlight.intensity = c && n > 0.3 ? 60 * n : 0; if (c) { const fx = Math.sin(c.h), fz = Math.cos(c.h); headlight.position.set(c.x + fx * 2, c.y + 0.8, c.z + fz * 2); headlight.target.position.set(c.x + fx * 20, c.y, c.z + fz * 20); } }
+  CM.head.emissiveIntensity = 0.5 + n * 2.5; CM.beam.opacity = clamp((n - 0.3) * 1.6, 0, 0.75); CM.lampGlow.opacity = clamp((n - 0.3) * 1.8, 0, 1); CM.tail.emissiveIntensity = 0.35 + n * 1.2; for (const m of signMats) m.emissiveIntensity = 0.35 + n * 1.6;
+  if (headlight) { const c = player.car; headlight.intensity = c && n > 0.3 && c.health > 0 ? 110 * n : 0; if (c) { const fx = Math.sin(c.h), fz = Math.cos(c.h); headlight.position.set(c.x + fx * c.s.len * 0.45, c.y + 0.9, c.z + fz * c.s.len * 0.45); headlight.target.position.set(c.x + fx * 22, c.y - 0.5, c.z + fz * 22); } }
   // shadows follow the player
   const P = playerPos(), snap = 2; sun.target.position.set(Math.round(P.x / snap) * snap, 0, Math.round(P.z / snap) * snap); sun.position.copy(sun.target.position).addScaledVector(_sd, 220);
   envT -= dt; if (envT <= 0 && Math.abs(day - lastEnvDay) > 0.04 || lastEnvDay < 0) { envT = 4; lastEnvDay = day; if (envRT) envRT.dispose(); envRT = pmrem.fromScene(skyScene, 0, 0.1, 200); scene.environment = envRT.texture; }
@@ -3423,6 +3529,7 @@ function step(dt) {
   updatePolice(dt); updateMission(dt);
   spawnT -= dt; if (spawnT <= 0) { spawnT = 0.35; manageSpawns(dt); }
   updateSmoke(dt);
+  if (fallingLamps.length) updateLamps(dt);
   if (ferris) { ferris.wheel.rotation.z += dt * 0.06; for (const c of ferris.cabs) c.rotation.z = -ferris.wheel.rotation.z; }
 }
 function loop(t) {
@@ -3447,7 +3554,7 @@ function init() {
   hemi = new T.HemisphereLight(0xcfe8ff, 0x6b5a40, 1.0); scene.add(hemi);
   sun = new T.DirectionalLight(0xfff3de, 3); scene.add(sun, sun.target);
   if (QUALITY !== 'low') { sun.castShadow = true; const ms = hi ? 2048 : 1024; sun.shadow.mapSize.set(ms, ms); const sc = sun.shadow.camera; sc.left = sc.bottom = -75; sc.right = sc.top = 75; sc.near = 20; sc.far = 450; sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.04; }
-  if (hi) { headlight = new T.SpotLight(0xfff4d0, 0, 70, 0.55, 0.5, 1.2); scene.add(headlight, headlight.target); }
+  if (QUALITY !== 'low') { headlight = new T.SpotLight(0xfff4d0, 0, 80, 0.62, 0.45, 1.2); scene.add(headlight, headlight.target); }
   humanMat = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.75 });
   makeTextures(); makeMaterials(); carMaterials(); setLimits();
   makeSky(); makeWater();
@@ -3556,14 +3663,14 @@ $('playBtn').onclick = () => {
   }, 30);
 };
 $('phoneClose').onclick = () => togglePhone(false);
-$('bPhone').onclick = () => togglePhone(); $('bMap').onclick = () => toggleMap(); $('bPause').onclick = () => togglePause(true); $('bCam').onclick = () => { camDistIdx = (camDistIdx + 1) % 3; };
+$('bPhone').onclick = () => togglePhone(); $('bMap').onclick = () => toggleMap(); $('bPause').onclick = () => togglePause(true); $('bCam').onclick = () => { camDistIdx = (camDistIdx + 1) % 3; }; $('bZin').onclick = () => zoomBy(1 / 1.25); $('bZout').onclick = () => zoomBy(1.25);
 setupBigMap();
 $('resumeBtn').onclick = () => togglePause(false);
 $('soundBtn').textContent = 'Hang: ' + (SOUND ? 'BE' : 'KI');
 $('soundBtn').onclick = () => { SOUND = !SOUND; saveSettings(); if (AU.master) AU.master.gain.value = SOUND ? 0.5 : 0; $('soundBtn').textContent = 'Hang: ' + (SOUND ? 'BE' : 'KI'); };
 $('qBtn').onclick = () => { QUALITY = { high: 'mid', mid: 'low', low: 'high' }[QUALITY]; saveSettings(); $('qBtn').textContent = 'Grafika: ' + { high: 'Magas', mid: 'Közepes', low: 'Alacsony' }[QUALITY] + ' (újraindítás után)'; };
 document.addEventListener('visibilitychange', () => { if (document.hidden && started && !paused) togglePause(true); });
-window.__game = { get camera() { return camera; }, get scene() { return scene; }, get player() { return player; }, get cars() { return cars; }, EDGES, NODES, RINGS, POI, enter: c => enterCar(c), startMission: i => startMission(MISSIONS[i]), setHours: h => { gameHours = h; lastEnvDay = -1; }, step: (n, dt) => { for (let i = 0; i < n; i++) { now += dt * 1000; gameT += dt; step(dt); } }, cam: (y, p) => { camYaw = y; camPitch = p; }, toggleMap, togglePhone, get stars() { return stars; }, setHero, get seq() { return player.seq; }, get peds() { return peds; } };
+window.__game = { get camera() { return camera; }, get scene() { return scene; }, get player() { return player; }, get cars() { return cars; }, EDGES, NODES, RINGS, POI, enter: c => enterCar(c), startMission: i => startMission(MISSIONS[i]), setHours: h => { gameHours = h; lastEnvDay = -1; }, step: (n, dt) => { for (let i = 0; i < n; i++) { now += dt * 1000; gameT += dt; step(dt); } }, cam: (y, p) => { camYaw = y; camPitch = p; }, toggleMap, togglePhone, get stars() { return stars; }, setHero, get seq() { return player.seq; }, get peds() { return peds; }, LAMPS, PED_TPL, CM, get zoom() { return camZoom; }, zoomBy };
 requestAnimationFrame(loop);
 })();
 </script>
