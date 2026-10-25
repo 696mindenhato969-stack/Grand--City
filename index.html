@@ -120,6 +120,23 @@ kbd{background:#fff;color:#000;border-radius:4px;padding:0 5px;font-family:Arial
  .touch #tGas{height:128px}
  .touch #speedo{right:auto;left:calc(16px + env(safe-area-inset-left));top:calc(116px + env(safe-area-inset-top));padding:0 10px 4px}.touch #kmh{font-size:28px}
 }
+/* v7: big speed number centred under the top buttons; throttle slider over the whole right edge */
+#speedo{left:50%;right:auto!important;top:calc(66px + env(safe-area-inset-top))!important;transform:translateX(-50%);text-align:center;background:none!important;padding:0!important;text-shadow:0 3px 0 rgba(0,0,0,.55),0 0 14px rgba(0,0,0,.45)}
+#kmh{font-size:64px!important;white-space:nowrap}
+#speedo small{display:inline;font-size:18px;margin:0}
+#carname{display:none}
+#hpbar{width:110px;height:5px;margin:4px auto 0}
+.touch #toast{top:calc(150px + env(safe-area-inset-top))}
+.touch #tGas{top:calc(8px + env(safe-area-inset-top))!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;right:calc(6px + env(safe-area-inset-right))!important;width:80px!important;height:auto!important;border-radius:26px;padding:10px 0;justify-content:space-between;overflow:hidden}
+#tGas i{position:absolute;top:50%;left:12%;width:76%}
+#tGas b{position:absolute;left:8px;right:8px;top:calc(50% - 26px);height:52px;border-radius:16px;background:rgba(255,255,255,.75);box-shadow:0 2px 8px rgba(0,0,0,.35);pointer-events:none}
+#tGas.fwd{background:rgba(140,242,122,.45)}#tGas.back{background:rgba(255,170,60,.45)}
+.touch #hud.incar #topright{right:calc(98px + env(safe-area-inset-right))}
+.touch #hud.incar #tBrake{right:calc(100px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));width:96px;height:80px}
+.touch #hud.incar #tHand{right:calc(116px + env(safe-area-inset-right));bottom:calc(110px + env(safe-area-inset-bottom));width:64px;height:64px}
+.touch #hud.incar #tAct{right:calc(112px + env(safe-area-inset-right));bottom:calc(186px + env(safe-area-inset-bottom));width:70px;height:70px}
+@media (max-height:460px){ #kmh{font-size:52px!important} .touch #speedo{top:calc(58px + env(safe-area-inset-top))!important} .touch #hud.incar #tAct{bottom:calc(180px + env(safe-area-inset-bottom));width:62px;height:62px} }
+@media (max-height:340px){ #kmh{font-size:34px!important} .touch #speedo{top:calc(50px + env(safe-area-inset-top))!important} .touch #hud.incar #tHand{bottom:calc(100px + env(safe-area-inset-bottom));width:52px;height:52px} .touch #hud.incar #tAct{right:calc(186px + env(safe-area-inset-right));bottom:calc(100px + env(safe-area-inset-bottom));width:56px;height:56px} }
 /* phone, map, pause */
 #phone{position:fixed;z-index:30;right:calc(24px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));width:330px;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);background:#120f24;border:7px solid #241f3d;border-radius:30px;box-shadow:0 10px 40px rgba(0,0,0,.6);overflow:hidden;display:flex;flex-direction:column}
 #phone .bar{background:linear-gradient(120deg,var(--pink),var(--sun));padding:12px 16px 10px;font-family:var(--display);font-size:22px;letter-spacing:.04em;display:flex;justify-content:space-between;align-items:center}
@@ -166,7 +183,7 @@ kbd{background:#fff;color:#000;border-radius:4px;padding:0 5px;font-family:Arial
     <b>Kamera:</b> húzd az egeret · <kbd>C</kbd> távolság · <b>Küldetések:</b> <kbd>P</kbd> · <b>Térkép + GPS:</b> <kbd>M</kbd> · <b>Szünet:</b> <kbd>Esc</kbd>
   </div>
   <div class="help" id="helpTouch">
-    <b>Telefonon:</b> gyalog bal joystick, 👊 ÜTÉS gomb, autóban ◀ ▶ kormány, a nagy GÁZ pedál felső fele előre, alsó fele hátra visz, FÉK, KÉZI = kézifék (drift). A képernyő húzásával forgatod a kamerát, két ujjal (csippentés) vagy a ＋ / － gombbal zoomolsz.<br>
+    <b>Telefonon:</b> gyalog bal joystick, 👊 ÜTÉS gomb, autóban ◀ ▶ kormány, a jobb szélső csúszkát középről felfelé húzva gyorsulsz (legfelül végsebesség), lefelé húzva tolatsz, FÉK, KÉZI = kézifék (drift). A képernyő húzásával forgatod a kamerát, két ujjal (csippentés) vagy a ＋ / － gombbal zoomolsz.<br>
     📱 küldetések · 🗺️ térkép, koppints egy helyre és a GPS odavezet
   </div>
 </div>
@@ -178,7 +195,7 @@ kbd{background:#fff;color:#000;border-radius:4px;padding:0 5px;font-family:Arial
   <canvas id="minimap" width="420" height="340"></canvas>
   <div id="objective"></div>
   <div id="topright"><div id="clock">15:30</div><div id="money">$0</div><div id="stars"><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></div></div>
-  <div id="speedo" class="hidden"><div id="kmh">0</div><small>KM/H</small><div id="carname"></div><div id="hpbar"><i></i></div></div>
+  <div id="speedo" class="hidden"><div id="kmh">0</div><small>km/h</small><div id="carname"></div><div id="hpbar"><i></i></div></div>
   <div id="timer"></div>
   <div id="bust" class="hidden">A rendőrség elkap!<div><i></i></div></div>
   <div id="big"><h1></h1><h2></h2></div>
@@ -188,7 +205,7 @@ kbd{background:#fff;color:#000;border-radius:4px;padding:0 5px;font-family:Arial
   <div id="touch">
     <div id="joy"><div id="knob"></div></div>
     <div class="tbtn" id="tLeft">◀</div><div class="tbtn" id="tRight">▶</div>
-    <div class="tbtn" id="tBrake">FÉK</div><div class="tbtn" id="tGas"><span>▲<br>GÁZ</span><i></i><span>HÁTRA<br>▼</span></div>
+    <div class="tbtn" id="tBrake">FÉK</div><div class="tbtn" id="tGas"><span>▲<br>GÁZ</span><i></i><b></b><span>HÁTRA<br>▼</span></div>
     <div class="tbtn" id="tHand">KÉZI</div><div class="tbtn" id="tHorn">📯</div>
     <div class="tbtn" id="tAct">BE / KI</div>
     <div class="tbtn" id="tPunch">👊<br>ÜTÉS</div><div class="tbtn" id="tJump">UGRÁS</div><div class="tbtn" id="tSprint">FUTÁS</div>
@@ -231,7 +248,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 const T = THREE;
 const IS_TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 const $ = id => document.getElementById(id);
-const VERSION = '6', VERSION_DATE = '2026.10.24';
+const VERSION = '7', VERSION_DATE = '2026.10.24';
 const PAGE_SNAPSHOT = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
 
 // ================= save / settings =================
@@ -2492,7 +2509,7 @@ class Car {
     if ((this.offT -= dt) <= 0) { this.offT = 0.25; this.offroad = roadClear(this.x, this.z) > 3.6 && !inPier(this.x, this.z); this.sand = this.x > seaX(this.z) - 78; }
     if (!this.air) {
       const mx = this.offroad ? s.max * (this.sand ? 0.45 : 0.7) : s.max;
-      if (thr > 0) { if (vf < -0.5) vf += thr * 30 * dt; else if (vf < mx) vf += thr * s.acc * (1 - 0.55 * vf / s.max) * dt; }
+      if (thr > 0) { if (vf < -0.5) vf += thr * 30 * dt; else if (vf < mx) vf += thr * s.acc * (this.driver === 'player' ? 0.7 : 1) * (1 - 0.55 * vf / s.max) * dt; }
       else if (thr < 0) { if (vf > 0.5) vf += thr * 32 * dt; else if (vf > -13) vf += thr * s.acc * 0.7 * dt; }
       vf -= vf * (0.1 + (Math.abs(thr) < 0.05 ? 0.28 : 0) + (this.offroad ? (this.sand ? 0.9 : 0.35) : 0) + (vf > mx ? 1.2 : 0)) * dt;
       if (this.hand || !this.driver) { const dd = (this.driver ? 12 : 9) * dt; vf = Math.abs(vf) <= dd ? 0 : vf - Math.sign(vf) * dd; }
@@ -2908,7 +2925,7 @@ function spawnParked() {
   // parking along the boulevards (outer lane) + the showroom line-up
   const ids = ['vento', 'torque', 'volt', 'marea', 'bello', 'rhino', 'strada'];
   const e = POI.showroom.e; let s = 60;
-  ids.forEach((id, i) => { const p = {}; edgeAt(e, s + i * 7, -(e.w - 1.15), p); const c = new Car(id, MODELS[id].colors[0], p.x, p.z, Math.atan2(p.tx, p.tz)); c.parked = true; c.showroom = true; PARKED.push(c); if (i === 0) POI.firstCar = c; });
+  ids.forEach((id, i) => { const p = {}; edgeAt(e, s + i * 7, -(e.w - 1.15), p); const c = new Car(id, MODELS[id].colors[0], p.x, p.z, Math.atan2(p.tx, p.tz) + PI); c.parked = true; c.showroom = true; PARKED.push(c); if (i === 0) POI.firstCar = c; });
   const p = {}; edgeAt(e, s - 4, -(e.w + 2.2), p); POI.spawn = { x: p.x, z: p.z, h: Math.atan2(p.tx, p.tz) };
   let n = 0;
   for (const f of EDGES) if (f.kind === 'blvd') for (let t = 20; t < f.len - 20 && n < LIM.parked; t += RR(14, 40)) {
@@ -2933,7 +2950,7 @@ function manageSpawns(dt) {
 // ================= input =================
 const keys = {};
 let actPressed = false, punchPressed = false, camInputT = 0;
-const touchIn = { jx: 0, jy: 0, steer: 0, gas: false, rev: false, brake: false, hand: false, jump: false, sprint: false, horn: false };
+const touchIn = { jx: 0, jy: 0, steer: 0, gas: false, rev: false, sl: null, brake: false, hand: false, jump: false, sprint: false, horn: false };
 let camYaw = 0, camPitch = 0.22, camDistIdx = 1, camZoom = 1;
 const zoomBy = f => { camZoom = clamp(camZoom * f, 0.4, 2.6); };
 const CAM_D = [[3.6, 5.6], [5.2, 7.6], [7.5, 11]];
@@ -2959,7 +2976,9 @@ function readInput() {
   let x = 0, y = 0;
   if (keys.KeyA || keys.ArrowLeft) x -= 1; if (keys.KeyD || keys.ArrowRight) x += 1;
   if (keys.KeyW || keys.ArrowUp) y += 1; if (keys.KeyS || keys.ArrowDown) y -= 1;
-  if (player.car) { x += touchIn.steer; y += (touchIn.gas ? 1 : 0) - (touchIn.brake || touchIn.rev ? 1 : 0); }
+  if (player.car) { x += touchIn.steer; y += (touchIn.gas ? 1 : 0) - (touchIn.brake || touchIn.rev ? 1 : 0);
+    // throttle slider: its height picks the speed to hold (top = top speed, bottom = full reverse)
+    if (touchIn.sl !== null && Math.abs(touchIn.sl) > 0.06) { const c = player.car, tg = touchIn.sl > 0 ? touchIn.sl * c.s.max : touchIn.sl * 13; y += clamp((tg - c.vf) / 5, tg < 0 ? -1 : -0.5, 1); } }
   else { x += touchIn.jx; y += touchIn.jy; }
   return { x: clamp(x, -1, 1), y: clamp(y, -1, 1), jump: !!(keys.Space || touchIn.jump || touchIn.hand), sprint: !!(keys.ShiftLeft || keys.ShiftRight || touchIn.sprint), horn: !!(keys.KeyH || touchIn.horn), touchSteer: touchIn.steer !== 0 };
 }
@@ -2987,10 +3006,10 @@ function setupTouch() {
   const hold = (id, on, off) => { const el = $(id); el.addEventListener('touchstart', e => { e.preventDefault(); on(); el.classList.add('on'); }, { passive: false }); const up = e => { e.preventDefault(); off(); el.classList.remove('on'); }; el.addEventListener('touchend', up); el.addEventListener('touchcancel', up); };
   let sl = 0, sr = 0; const st = () => { touchIn.steer = sr - sl; };
   hold('tLeft', () => { sl = 1; st(); }, () => { sl = 0; st(); }); hold('tRight', () => { sr = 1; st(); }, () => { sr = 0; st(); });
-  // one big pedal: upper half drives forward, lower half reverses; sliding the finger switches
-  const gp = $('tGas'); let gid = null;
-  const gset = t => { const r = gp.getBoundingClientRect(), up = t.clientY < r.top + r.height / 2; touchIn.gas = up; touchIn.rev = !up; gp.classList.toggle('fwd', up); gp.classList.toggle('back', !up); };
-  const gend = e => { for (const t of e.changedTouches) if (t.identifier === gid) { gid = null; touchIn.gas = touchIn.rev = false; gp.classList.remove('fwd', 'back'); } };
+  // full-height slider on the right edge: middle = idle, push up to go faster, pull down to reverse
+  const gp = $('tGas'), gk = gp.querySelector('b'); let gid = null;
+  const gset = t => { const r = gp.getBoundingClientRect(), half = r.height / 2 - 30, v = clamp((r.top + r.height / 2 - t.clientY) / half, -1, 1); touchIn.sl = v; gk.style.transform = 'translateY(' + (-v * half) + 'px)'; gp.classList.toggle('fwd', v > 0.06); gp.classList.toggle('back', v < -0.06); };
+  const gend = e => { for (const t of e.changedTouches) if (t.identifier === gid) { gid = null; touchIn.sl = null; gk.style.transform = ''; gp.classList.remove('fwd', 'back'); } };
   gp.addEventListener('touchstart', e => { e.preventDefault(); const t = e.changedTouches[0]; gid = t.identifier; gset(t); }, { passive: false });
   gp.addEventListener('touchmove', e => { e.preventDefault(); for (const t of e.changedTouches) if (t.identifier === gid) gset(t); }, { passive: false });
   gp.addEventListener('touchend', gend); gp.addEventListener('touchcancel', gend); hold('tBrake', () => touchIn.brake = true, () => touchIn.brake = false);
@@ -3159,7 +3178,7 @@ function updatePlayer(dt, inp) {
   if (player.car) {
     const c = player.car, tch = inp.touchSteer, sx = inp.x / (1 + Math.abs(c.vf) / (tch ? 30 : 45));
     c.steer = lerp(c.steer, sx, Math.min(1, dt * (Math.abs(sx) > 0.01 ? (tch ? 3.2 : 4.5) : 7)));
-    c.thr = inp.y; c.hand = inp.jump;
+    c.thr += clamp(inp.y - c.thr, -dt * 5, dt * (inp.y > c.thr && inp.y > 0 ? 1.8 : 5)); c.hand = inp.jump; // throttle eases in instead of jumping to full
     if (actPressed) exitCar();
     const hs = heroSeat(c), hm = player.m;
     if (hs && player.car) { const P = seatPose(hs.rec), st = c.steer * 0.22; P.uaL[0] -= st; P.uaR[0] += st; P.head = [P.head[0], -c.steer * 0.25, 0]; hm.g.position.set(hs.x, hs.y, hs.z); hm.g.rotation.set(0, 0, 0); heroApply(hm, P); }
@@ -3359,7 +3378,7 @@ function togglePause(v) {
 const MX0 = -720, MZ0 = -740, MW = 1640, MAPS = 2048, MSC = MAPS / MW;
 let mapCanvas;
 function buildMapCanvas() {
-  mapCanvas = document.createElement('canvas'); mapCanvas.width = mapCanvas.height = MAPS; const g = mapCanvas.getContext('2d');
+  mapCanvas = document.createElement('canvas'); mapCanvas.width = mapCanvas.height = MAPS; const g = mapCanvas.getContext('2d', { willReadFrequently: true });
   const N = 410, img = g.createImageData(N, N), step = MW / N;
   for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
     const x = MX0 + (i + 0.5) * step, z = MZ0 + (j + 0.5) * step, h = H(x, z), k = (j * N + i) * 4; let c;
@@ -3387,6 +3406,7 @@ function drawRoute(g, route, w) { if (!route || route.length < 2) return; g.stro
 function drawArrow(g, x, y, ang, s, col) { g.save(); g.translate(x, y); g.rotate(ang); g.fillStyle = col; g.strokeStyle = '#000'; g.lineWidth = 2; g.beginPath(); g.moveTo(0, -s); g.lineTo(s * 0.7, s * 0.8); g.lineTo(0, s * 0.4); g.lineTo(-s * 0.7, s * 0.8); g.closePath(); g.fill(); g.stroke(); g.restore(); }
 function drawMinimap() {
   const cv = $('minimap'), g = cv.getContext('2d'), W = cv.width, Hh = cv.height, P = playerPos();
+  { const mg = mapCanvas.getContext('2d', { willReadFrequently: true }); if (mg.isContextLost && mg.isContextLost()) buildMapCanvas(); }
   g.save(); g.clearRect(0, 0, W, Hh); g.beginPath(); g.roundRect ? g.roundRect(0, 0, W, Hh, 18) : g.rect(0, 0, W, Hh); g.clip();
   g.fillStyle = '#5ec8dc'; g.fillRect(0, 0, W, Hh);
   const zoom = player.car ? 0.9 + Math.min(0.6, player.car.speed() / 60) : 0.7; // world metres per pixel factor
@@ -3434,7 +3454,7 @@ function updateHUD(dt) {
   const hh = Math.floor(gameHours) % 24, mm = Math.floor((gameHours % 1) * 60); setText('clock', String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0'));
   const st = $('stars').children; for (let i = 0; i < 5; i++) st[i].classList.toggle('on', i < stars);
   $('stars').classList.toggle('blink', stars > 0 && gameT - lastSeen > 2);
-  if (player.car) { $('speedo').classList.remove('hidden'); setText('kmh', String(Math.round(Math.abs(player.car.vf) * 3.6))); $('hpbar').firstChild.style.width = player.car.health + '%'; setText('carname', MODELS[player.car.id].name); }
+  if (player.car) { $('speedo').classList.remove('hidden'); setText('kmh', String(Math.round(Math.abs(player.car.vf) * 3.6)) + (player.car.vf < -0.5 ? ' ◀' : '')); $('hpbar').firstChild.style.width = player.car.health + '%'; setText('carname', MODELS[player.car.id].name); }
   else $('speedo').classList.add('hidden');
   setText('timer', timerVal != null ? (timerUp ? '⏱ ' : '') + (timerVal >= 60 ? Math.floor(timerVal / 60) + ':' + String(Math.floor(timerVal % 60)).padStart(2, '0') : timerVal.toFixed(timerUp ? 1 : 0)) : '');
   $('timer').classList.toggle('low', !timerUp && timerVal != null && timerVal < 10);
@@ -3575,7 +3595,7 @@ function init() {
   hemi = new T.HemisphereLight(0xcfe8ff, 0x6b5a40, 1.0); scene.add(hemi);
   sun = new T.DirectionalLight(0xfff3de, 3); scene.add(sun, sun.target);
   if (QUALITY !== 'low') { sun.castShadow = true; const ms = hi ? 2048 : 1024; sun.shadow.mapSize.set(ms, ms); const sc = sun.shadow.camera; sc.left = sc.bottom = -75; sc.right = sc.top = 75; sc.near = 20; sc.far = 450; sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.04; }
-  if (QUALITY !== 'low') { headlight = new T.SpotLight(0xfff4d0, 0, 80, 0.62, 0.45, 1.2); scene.add(headlight, headlight.target); }
+  if (QUALITY === 'high') { headlight = new T.SpotLight(0xfff4d0, 0, 80, 0.62, 0.45, 1.2); scene.add(headlight, headlight.target); }
   humanMat = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.75 });
   makeTextures(); makeMaterials(); carMaterials(); setLimits();
   makeSky(); makeWater();
@@ -3605,7 +3625,16 @@ function placeLandmarks() {
 }
 // show script errors on screen so a screenshot tells what went wrong
 addEventListener('error', e => { try { toast('Hiba: ' + String(e.message).slice(0, 90)); } catch (er) {} });
-{ const ce = console.error.bind(console); let n = 0; console.error = (...a) => { ce(...a); if (n++ < 3) try { toast('Hiba: ' + a.map(String).join(' ').replace(/\s+/g, ' ').slice(0, 110)); } catch (er) {} }; }
+// self-heal: if the phone's GPU can't run a shader or drops the 3D context, step graphics down and reload once
+function healGfx(why) {
+  let tried = ''; try { tried = sessionStorage.getItem('gc6_heal') || ''; } catch (e) {}
+  const next = QUALITY === 'high' ? 'mid' : QUALITY === 'mid' ? 'low' : null;
+  if (!next || tried.includes(QUALITY)) { toast('Grafikai hiba (' + why + ') – küldj róla képet Claude-nak!'); return; }
+  try { sessionStorage.setItem('gc6_heal', tried + QUALITY); } catch (e) {}
+  QUALITY = next; saveSettings(); save(); toast('Grafika átállítva: ' + (next === 'mid' ? 'Közepes' : 'Alacsony') + ' – újraindítás...');
+  setTimeout(() => location.reload(), 1200);
+}
+{ const ce = console.error.bind(console); let n = 0; console.error = (...a) => { ce(...a); const s = a.map(String).join(' '); if (/Shader Error|Program Info|VALIDATE_STATUS|linkProgram/i.test(s)) { healGfx('shader'); return; } if (n++ < 3) try { toast('Hiba: ' + a.map(String).join(' ').replace(/\s+/g, ' ').slice(0, 110)); } catch (er) {} }; }
 
 if (IS_TOUCH) document.body.classList.add('touch');
 $('helpDesk').classList.toggle('hidden', IS_TOUCH); $('helpTouch').classList.toggle('hidden', !IS_TOUCH);
@@ -3666,6 +3695,8 @@ function glWait(msg) {
   let o = $('glWait'); if (!o) { o = document.createElement('div'); o.id = 'glWait'; o.style.cssText = 'position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:linear-gradient(#c2306f,#ff7a45);color:#fff;font:800 22px "Barlow Condensed",Arial,sans-serif;text-align:center;padding:24px'; document.body.appendChild(o); }
   o.innerHTML = msg; o.style.display = 'flex'; return o;
 }
+$('game').addEventListener('webglcontextlost', e => { e.preventDefault(); if (started) healGfx('context'); });
+setInterval(() => { if (!renderer || !started) return; try { for (const pr of renderer.info.programs || []) if (pr.diagnostics && pr.diagnostics.runnable === false) { healGfx('program'); break; } } catch (e) {} }, 3000);
 addEventListener('pagehide', () => { save(); if (renderer) try { renderer.forceContextLoss(); } catch (e) {} });
 addEventListener('pageshow', e => { if (e.persisted && started) { save(); try { location.reload(); } catch (er) {} } });
 $('playBtn').onclick = () => {
